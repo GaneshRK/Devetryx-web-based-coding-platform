@@ -1,0 +1,459 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}
+Devetryx | Python Compiler
+{% endblock %}
+
+{% block content %}
+
+<style>
+
+/* ================= GLOBAL ================= */
+
+html, body {
+    height: 100%;
+}
+
+body {
+    background: #ffffff !important;
+    font-family: "Poppins", sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* ================= TITLE ================= */
+
+.compiler-title {
+    margin-top: 12vh;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.compiler-title img {
+    height: 42px;
+}
+
+.compiler-title h2 {
+    font-weight: 600;
+    color: #222;
+    margin: 0;
+}
+
+/* ================= MAIN ================= */
+
+.compiler-container {
+    display: flex;
+    gap: 15px;
+    margin: 15px;
+    min-height: calc(100vh - 180px);
+}
+
+/* ================= PANELS ================= */
+
+.editor-panel,
+.output-panel {
+    background: #ffffff;
+    border: 1px solid #dcdcdc;
+    border-radius: 6px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.editor-panel { flex: 1 1 60%; }
+.output-panel { flex: 1 1 40%; }
+
+/* ================= FILE TABS ================= */
+
+.file-tabs {
+    display: flex;
+    align-items: center;
+    background: #fafafa;
+    border-bottom: 1px solid #ddd;
+    height: 40px;
+    overflow-x: auto;
+}
+
+.file-tab {
+    padding: 8px 14px;
+    cursor: pointer;
+    border-right: 1px solid #eee;
+    background: #ffffff;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.file-tab.active {
+    font-weight: 600;
+    border-bottom: 2px solid #4f6cf6;
+}
+
+/* ================= EDITOR ================= */
+
+#editor {
+    flex: 1;
+    min-height: 320px;
+}
+
+/* ================= OUTPUT ================= */
+
+.output-top-bar,
+.toggle-wrapper {
+    flex-shrink: 0;
+}
+
+.output-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.run-btn {
+    padding: 8px 16px;
+    border: none;
+    color: #fff;
+    background: #4f6cf6;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.run-btn:hover {
+    background: #1e42fb;
+}
+
+.toggle-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.toggle-label {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Toggle */
+
+.switch {
+    position: relative;
+    width: 52px;
+    height: 26px;
+}
+
+.switch input {
+    opacity: 0;
+}
+
+.slider {
+    position: absolute;
+    inset: 0;
+    background: #ccc;
+    border-radius: 34px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.slider:before {
+    content: "";
+    position: absolute;
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background: #fff;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+input:checked + .slider {
+    background: #5a74f7;
+}
+
+input:checked + .slider:before {
+    transform: translateX(24px);
+}
+
+/* ================= TERMINAL OUTPUT ================= */
+
+.intelligence-container {
+    flex: 1;
+    border: 1px solid #dcdcdc;
+    border-radius: 6px;
+    padding: 15px;
+    overflow-y: auto;
+    background: transparent;
+    color: #000000;
+    font-family: monospace;
+    font-size: 14px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 992px) {
+    .compiler-container {
+        flex-direction: column;
+    }
+}
+
+</style>
+
+<!-- ================= TITLE ================= -->
+
+<div class="compiler-title">
+    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg">
+    <h2>Python Compiler</h2>
+</div>
+
+<!-- ================= MAIN ================= -->
+
+<div class="compiler-container container-fluid">
+
+    <!-- EDITOR -->
+    <div class="editor-panel">
+        <div class="file-tabs" id="fileTabs">
+            <div class="file-tab active" id="tab-main.py" onclick="switchTab('main.py')">main.py</div>
+            <div class="file-tab" onclick="openFilePopup()">+ New File</div>
+        </div>
+        <div id="editor"></div>
+    </div>
+
+    <!-- OUTPUT -->
+    <div class="output-panel">
+
+        <div class="output-top-bar">
+            <strong>Output</strong>
+            <button class="run-btn" id="runBtn" onclick="runCode()">Run</button>
+        </div>
+
+        <div class="toggle-wrapper">
+            <span class="toggle-label" id="errorLabel">🖥 Compiler Mode</span>
+            <label class="switch">
+                <input type="checkbox" checked onchange="updateToggleText()" id="errorModeToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div id="outputContainer" class="intelligence-container"></div>
+
+        <div id="terminalInputWrapper" style="display:none; margin-top:8px;">
+            <input 
+                id="terminalInput"
+                type="text"
+                placeholder="Type input and press Enter..."
+                style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; font-family:monospace;"
+            >
+        </div>
+
+    </div>
+</div>
+
+<!-- ================= POPUP ================= -->
+
+<div id="popupBG" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); justify-content:center; align-items:center; z-index:1000;">
+    <div style="background:#fff; padding:20px; width:320px; border-radius:6px; border:1px solid #ccc;">
+        <strong>Create New File</strong>
+        <input id="newFileName" placeholder="example.py"
+               style="width:100%; padding:8px; margin-top:10px; border:1px solid #ccc; border-radius:4px;">
+        <div style="display:flex; justify-content:space-between; margin-top:15px;">
+            <button onclick="createFile()" style="background:#4f6cf6; color:#fff; border:none; padding:7px 14px; border-radius:4px;">
+                Create
+            </button>
+            <button onclick="closePopup()" style="background:#e0e0e0; border:none; padding:7px 14px; border-radius:4px;">
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.js"></script>
+
+<script>
+
+let editor;
+let currentFileName = "main.py";
+const fileContents = { "main.py": 'print("Welcome to Devetryx!")' };
+
+/* ================= MONACO ================= */
+
+require.config({ paths: { vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs" } });
+
+require(["vs/editor/editor.main"], function () {
+    editor = monaco.editor.create(document.getElementById("editor"), {
+        value: fileContents[currentFileName],
+        language: "python",
+        theme: "vs",
+        fontSize: 14,
+        minimap: { enabled: false },
+        automaticLayout: true
+    });
+
+    editor.onDidChangeModelContent(() => {
+        fileContents[currentFileName] = editor.getValue();
+    });
+});
+
+/* ================= FILE MANAGEMENT ================= */
+
+function switchTab(name) {
+    if (currentFileName === name) return;
+
+    fileContents[currentFileName] = editor.getValue();
+    document.getElementById(`tab-${currentFileName}`).classList.remove("active");
+    document.getElementById(`tab-${name}`).classList.add("active");
+
+    currentFileName = name;
+    editor.setValue(fileContents[name]);
+}
+
+function openFilePopup() {
+    document.getElementById("popupBG").style.display = "flex";
+}
+
+function closePopup() {
+    document.getElementById("popupBG").style.display = "none";
+}
+
+function createFile() {
+    let name = document.getElementById("newFileName").value.trim();
+    if (!name) return alert("File name required");
+
+    if (!name.endsWith(".py")) name += ".py";
+    if (fileContents[name]) return alert("File already exists");
+
+    fileContents[name] = "";
+
+    const tab = document.createElement("div");
+    tab.className = "file-tab";
+    tab.id = `tab-${name}`;
+    tab.innerText = name;
+    tab.onclick = () => switchTab(name);
+
+    document.getElementById("fileTabs")
+        .insertBefore(tab, document.getElementById("fileTabs").lastElementChild);
+
+    closePopup();
+    switchTab(name);
+}
+
+/* ================= RUN CODE ================= */
+let pendingInputResolve = null;
+let collectedInputs = [];
+
+function runCode() {
+
+    const body = document.getElementById("outputContainer");
+    const runBtn = document.getElementById("runBtn");
+    const toggle = document.getElementById("errorModeToggle");
+
+    runBtn.disabled = true;
+    runBtn.innerText = "Running...";
+
+    body.innerHTML = "$ python " + currentFileName + "\n\n";
+    collectedInputs = [];
+
+    executeWithInput();
+}
+
+function executeWithInput() {
+
+    const body = document.getElementById("outputContainer");
+    const toggle = document.getElementById("errorModeToggle");
+
+    fetch("/run/python/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+        body: JSON.stringify({
+            files: fileContents,
+            main_file: currentFileName,
+            mode: toggle.checked ? "compiler" : "mentor",
+            user_input: collectedInputs.join("\n")
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        if (data.waiting_for_input) {
+            // During input stage → append
+            body.innerHTML += data.output;
+            showInputBox();
+        } else {
+            // Final execution → REPLACE entire terminal
+            body.innerHTML = "$ python " + currentFileName + "\n\n" + data.output;
+            finishRun();
+        }
+
+        body.scrollTop = body.scrollHeight;
+    })
+
+    .catch(err => {
+        body.innerHTML += "Error: " + err;
+        finishRun();
+    });
+}
+
+function showInputBox() {
+    const inputBox = document.getElementById("terminalInputWrapper");
+    const inputField = document.getElementById("terminalInput");
+
+    inputBox.style.display = "block";
+    inputField.focus();
+
+    inputField.onkeydown = function(e) {
+        if (e.key === "Enter") {
+            const value = inputField.value;
+            collectedInputs.push(value);
+
+            const body = document.getElementById("outputContainer");
+            body.innerHTML += value + "\n";
+
+            inputField.value = "";
+            inputBox.style.display = "none";
+
+            executeWithInput();
+        }
+    };
+}
+
+function finishRun() {
+    const runBtn = document.getElementById("runBtn");
+    runBtn.disabled = false;
+    runBtn.innerText = "Run";
+}
+
+
+/* ================= TOGGLE ================= */
+
+function updateToggleText() {
+    const toggle = document.getElementById("errorModeToggle");
+    document.getElementById("errorLabel").innerText =
+        toggle.checked ? "🖥 Compiler Mode" : "🧠 Learning Mode";
+}
+
+/* ================= CSRF ================= */
+
+function getCookie(name) {
+    let value = null;
+    document.cookie.split(";").forEach(c => {
+        c = c.trim();
+        if (c.startsWith(name + "=")) {
+            value = c.substring(name.length + 1);
+        }
+    });
+    return value;
+}
+
+</script>
+
+{% endblock %}

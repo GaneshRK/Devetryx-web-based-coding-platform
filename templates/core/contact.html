@@ -1,0 +1,160 @@
+{% extends 'core/base.html' %}
+{% block title %}Contact — Devetryx{% endblock %}
+
+{% block content %}
+
+<style>
+
+/* ============================
+   CONTACT PAGE WRAPPER
+============================ */
+.contact-page {
+  max-width: 650px;
+  margin: 5rem auto;
+  padding: 2rem;
+  text-align: center;
+}
+.contact-page h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 2rem;
+
+  display: inline-block; /* essential for background-clip to work */
+  background: linear-gradient(90deg, #4f6cf6, #6ad1ff);
+  -webkit-background-clip: text; /* Chrome, Safari, Edge */
+  -webkit-text-fill-color: transparent; /* needed for WebKit */
+  color: transparent; /* fallback */
+}
+
+
+
+
+/* ============================
+   FORM CONTAINER (Glass theme)
+============================ */
+.contact-form {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 16px;
+  padding: 2.2rem;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  border: 1px solid rgba(255,255,255,0.35);
+
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ============================
+   FLOATING LABEL INPUTS
+============================ */
+.contact-form label {
+  position: relative;
+  display: block;
+}
+
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  outline: none;
+  background: rgba(255,255,255,0.9);
+  font-size: 1rem;
+  transition: all .25s ease;
+}
+
+/* Focus effect */
+.contact-form input:focus,
+.contact-form textarea:focus {
+  border-color: #4f6cf6;
+  box-shadow: 0 0 0 3px rgba(79,108,246,0.2);
+}
+
+/* LABEL TEXT (floating) */
+.contact-form .label {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  font-size: 0.95rem;
+  color: #64748b;
+  pointer-events: none;
+  transition: 0.25s ease;
+}
+
+/* Floating effect when typing */
+.contact-form input:focus + .label,
+.contact-form textarea:focus + .label,
+.contact-form input:not(:placeholder-shown) + .label,
+.contact-form textarea:not(:placeholder-shown) + .label {
+  top: -10px;
+  left: 10px;
+  font-size: 0.78rem;
+  background: white;
+  padding: 0 6px;
+  color: #4f6cf6;
+}
+
+/* ============================
+    SUBMIT BUTTON
+============================ */
+.btn-primary {
+  background: linear-gradient(90deg, #4f6cf6, #6ad1ff);
+  border: none;
+  padding: 0.8rem 1.4rem;
+  font-weight: 600;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(79,108,246,0.35);
+}
+
+/* Status message */
+#contact-status {
+  margin-left: 1rem;
+  font-size: 0.95rem;
+  color: #475569;
+}
+
+</style>
+
+
+<section class="container contact-page">
+  
+  <h1>Contact Us</h1>
+
+  <form id="contact-form" class="contact-form" method="post" action="{% url 'core:contact_submit' %}">
+    {% csrf_token %}
+
+    <label>
+      <input name="name" type="text" required placeholder=" " />
+      <span class="label">Name</span>
+    </label>
+
+    <label>
+      <input name="email" type="email" required placeholder=" " />
+      <span class="label">Email</span>
+    </label>
+
+    <label>
+      <textarea name="message" rows="5" required placeholder=" "></textarea>
+      <span class="label">Message</span>
+    </label>
+
+    <div>
+      <button class="btn btn-primary" type="submit">Send Message</button>
+      <span id="contact-status" role="status" aria-live="polite"></span>
+    </div>
+
+  </form>
+
+</section>
+
+{% endblock %}

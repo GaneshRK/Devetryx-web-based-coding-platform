@@ -1,0 +1,330 @@
+  {% extends 'core/base.html' %}
+  {% load static %}
+  {% block title %}Home — Devetryx{% endblock %}
+
+  {% block content %}
+
+  <style>
+
+  /* Fix homepage content being too far up */
+  body {
+    padding-top: 95px;
+  }
+
+  /* ===========================
+        HERO SECTION
+  =========================== */
+  .hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4rem 0;
+    gap: 2rem;
+    padding-left: 20px;
+  }
+  .content{
+    height:100vh;
+  }
+  .hero-title {
+    font-size: 3.2rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #0f172a;
+  }
+
+  .hero-highlight {
+    background: linear-gradient(90deg, #4f6cf6, #6ad1ff);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  .hero-tagline {
+    font-size: 1.2rem;
+    color: #475569;
+    margin: 1.1rem 0 2rem;
+  }
+
+  .hero-cta .btn {
+    margin-right: .7rem;
+  }
+
+  /* ===========================
+        COMPILER CARDS
+  =========================== */
+  .compiler-section {
+    margin-top: 5rem;
+    text-align: center;
+  }
+
+  .section-title {
+    font-size: 2.4rem;
+    font-weight: 800;
+    margin-bottom: .3rem;
+  }
+
+  .section-sub {
+    font-size: 1rem;
+    color: #64748b;
+    margin-bottom: 2rem;
+  }
+
+  .compiler-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.7rem;
+  }
+
+  .compiler-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 1.7rem;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.2);
+    text-align: center;
+    text-decoration: none; /* remove underline */
+    color: inherit;    
+    transition: transform .3s ease, box-shadow .3s ease;
+    border: 1px solid rgba(0,0,0,0.06);
+  }
+
+  .compiler-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 14px 34px rgba(0,0,0,0.4);
+  }
+
+  .compiler-icon {
+    width: 50px;
+    height: 50px;
+  }
+
+  /* ===========================
+        PROGRAMMING FEATURES
+  =========================== */
+  /* ===========================
+    FLIP FEATURE CARDS (White)
+  =========================== */
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.7rem;
+  }
+
+  .feature-card {
+    width: 100%;
+    height: 200px;
+    perspective: 1000px;
+  }
+
+  .feature-inner {
+    width: 100%;
+    height: 100%;
+    position: relative;
+
+    transition: transform .7s ease;
+    transform-style: preserve-3d;
+  }
+
+  .feature-card:hover .feature-inner {
+    transform: rotateY(180deg);
+  }
+
+  /* Front side */
+  .feature-front, .feature-back {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 14px;
+  }
+
+  /* FRONT: White card with title */
+  .feature-front {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .feature-front h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #111827;
+  }
+
+  .feature-front .icon {
+    font-size: 2rem;
+    margin-bottom: .6rem;
+    color: #4f6cf6;
+  }
+  .features-preview {
+  margin-top: 5rem;
+  text-align: center;
+}
+
+
+  /* BACK: Description */
+  .feature-back {
+    background: #ffffff;
+    color: rgb(0, 0, 0);
+    transform: rotateY(180deg);
+    padding: 1rem;
+    text-align: center;
+    font-size: 1rem;
+    line-height: 1.4;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  }
+
+
+  .dynamic-load {
+    margin-top: 1.5rem;
+    text-align: center;
+  }
+
+  .dynamic-load .btn {
+    background: #4f6cf6;
+    color: white;
+  }
+
+  </style>
+
+
+  <!-- HERO SECTION -->
+  <section class="hero container">
+    <div class="hero-content">
+      <h1 class="hero-title">
+        Welcome to Devetryx —  
+        <span class="hero-highlight">Your Coding Playground.</span>
+      </h1>
+
+      <p class="hero-tagline">
+        A dynamic programming platform with compilers, tools, and interactive features designed  
+        for beginners, students, and aspiring developers.
+      </p>
+
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="#compiler">Start Coding</a>
+        <a class="btn" href="{% url 'core:contact' %}">Get Help</a>
+      </div>
+    </div>
+
+    <div class="hero-visual" aria-hidden="true">
+      <img src="{% static 'img/logo.png' %}" alt="Platform visual" />
+    </div>
+  </section>
+
+
+  <!-- COMPILER COLLECTION -->
+  <section class="container compiler-section" id="compiler">
+    <h2 class="section-title">Online Compilers</h2>
+    <p class="section-sub">Pick a language and start coding instantly.</p>
+
+    <div class="compiler-grid">
+      <a href="{% url 'core:python_compiler' %}" class="compiler-card">
+        <img src="https://logo.svgcdn.com/logos/python.svg" class="compiler-icon">
+        <h3>Python</h3>
+        <p>Run Python online effortlessly.</p>
+      </a>
+
+      <a href="#" class="compiler-card">
+        <img src="https://logo.svgcdn.com/logos/javascript.png" class="compiler-icon">
+        <h3>JavaScript</h3>
+        <p>Test JS code instantly.</p>
+      </a>
+
+      <a href="#" class="compiler-card">
+        <img src="https://logo.svgcdn.com/logos/c.png" class="compiler-icon">
+        <h3>C</h3>
+        <p>Fast and powerful compiler.</p>
+      </a>
+
+      <a href="#" class="compiler-card">
+        <img src="https://logo.svgcdn.com/logos/java.png" class="compiler-icon">
+        <h3>Java</h3>
+        <p>Perfect for OOP beginners.</p>
+      </a>
+
+      <a href="#" class="compiler-card">
+        <img src="https://cdn.freebiesupply.com/logos/large/2x/html5-logo-png-transparent.png" class="compiler-icon">
+        <h3>HTML/CSS</h3>
+        <p>Create webpages live.</p>
+      </a>
+
+      <a href="#" class="compiler-card">
+        <img src="https://logo.svgcdn.com/logos/php.png" class="compiler-icon">
+        <h3>PHP</h3>
+        <p>Backend made simple.</p>
+      </a>
+    </div>
+  </section>
+
+<!-- PROGRAMMING FEATURES SECTION -->
+<section class="container features-preview" aria-labelledby="features-heading">
+
+  <h2 id="features-heading" class="section-title">Developer-Focused Features</h2>
+  <p class="section-sub">Powerful tools designed to make your coding journey smoother.</p>
+
+  <div class="cards" id="features-list">
+
+    <div class="feature-card">
+      <div class="feature-inner">
+
+        <div class="feature-front">
+          <div class="icon">⌨️</div>
+          <h3>Live Syntax Highlighting</h3>
+        </div>
+
+        <div class="feature-back">
+          <p>Experience smooth, real-time syntax highlighting like VSCode.</p>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-inner">
+        <div class="feature-front">
+          <div class="icon">⚡</div>
+          <h3>Instant Code Execution</h3>
+        </div>
+        <div class="feature-back">
+          <p>Run your code instantly using an optimized execution engine.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-inner">
+        <div class="feature-front">
+          <div class="icon">📦</div>
+          <h3>Multi-language Support</h3>
+        </div>
+        <div class="feature-back">
+          <p>Switch between Python, C, Java, JS, PHP, HTML and more.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-inner">
+        <div class="feature-front">
+          <div class="icon">☁️</div>
+          <h3>Cloud Snippets</h3>
+        </div>
+        <div class="feature-back">
+          <p>Save, share and load code securely from the cloud.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+
+  {% endblock %}

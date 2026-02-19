@@ -1,0 +1,21 @@
+{% extends 'core/base.html' %}
+{% block title %}Features — Devetryx{% endblock %}
+{% block content %}
+<section class="container features-page">
+  <h1>Features</h1>
+  <p class="muted">In-depth look at what Devetryx offers.</p>
+  <div class="cards">
+    {% for f in features %}
+    <article class="card feature-card">
+      <div class="card-icon" aria-hidden="true">{{ f.icon }}</div>
+      <div>
+        <h3>{{ f.title }}</h3>
+        <p class="muted">{{ f.subtitle }}</p>
+      </div>
+    </article>
+    {% empty %}
+    <p>No features have been configured yet.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

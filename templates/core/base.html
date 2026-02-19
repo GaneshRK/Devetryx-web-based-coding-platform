@@ -1,0 +1,190 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{% block title %}Devetryx{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" >
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <script src="{% static 'js/main.js' %}" defer></script>
+  {% block head %}{% endblock %}
+</head>
+
+<body class="page-root">
+    <style>
+      :root{--bg:#ffffff;--muted:#6b7280;--sky:#3BA4FF;--card:#f8fafc;--radius:12px;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#0f172a;line-height:1.45;font-family:Inter, sans-serif}.container{max-width:1100px;margin:0 auto;padding:1rem}.nav-wrap{position:sticky;top:0;background:rgba(255,255,255,0.9);backdrop-filter:blur(4px);z-index:50;border-bottom:1px solid #eef2f7}.nav{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:0.5rem 1rem}.brand{display:flex;align-items:center;gap:.5rem;text-decoration:none;color:inherit}.logo{width:42px;height:42px;border-radius:8px}.nav-menu{list-style:none;display:flex;gap:1rem;margin:0;padding:0}.nav-menu a{text-decoration:none;color:inherit;padding:.5rem;border-radius:8px}.nav-menu a:hover{background:var(--card);transform:translateY(-2px);transition:all .18s ease}.nav-toggle{display:none}.hero{display:grid;grid-template-columns:1fr;gap:1rem;align-items:center;padding:2rem 1rem}.hero-title{font-size:1.7rem;margin:.25rem 0}.hero-tagline{color:var(--muted);margin-bottom:1rem}.hero-cta .btn{margin-right:.5rem}.btn{display:inline-block;padding:.6rem .9rem;border-radius:10px;border:1px solid #e6eef9;background:transparent;text-decoration:none;cursor:pointer}.btn-primary{background:var(--sky);color:white;border:none;box-shadow:0 6px 18px rgba(59,164,255,0.18)}.cards{display:grid;grid-template-columns:1fr;gap:1rem;margin-top:1rem}.card{background:var(--card);padding:1rem;border-radius:var(--radius);display:flex;gap:1rem;align-items:center;box-shadow:0 6px 16px rgba(8,15,30,0.03);transition:transform .18s ease,box-shadow .18s ease}.card:hover{transform:translateY(-6px);box-shadow:0 12px 30px rgba(8,15,30,0.06)}.card-icon{font-size:1.7rem;width:48px;height:48px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:white;box-shadow:inset 0 -6px 12px rgba(59,164,255,0.06)}.muted{color:var(--muted)}.footer-grid{display:grid;grid-template-columns:repeat(1,1fr);gap:1rem;padding:2rem 0}.footer-bottom{text-align:center;padding:1rem 0;border-top:1px solid #f1f5f9}.contact-form label{display:block;margin-bottom:.75rem}.contact-form input,.contact-form textarea{width:100%;padding:.6rem;border-radius:8px;border:1px solid #e6eef9;background:#fff}.contact-form .label{display:block;margin-bottom:.25rem;font-weight:600}@media(min-width:768px){.hero{grid-template-columns:1fr 360px}.cards{grid-template-columns:repeat(3,1fr)}.nav-toggle{display:none}}
+      /* NAVBAR DYNAMIC STYLE */
+.brand{
+  font-weight:bold;
+  background: linear-gradient(45deg, #2e50fd, #4bc6ff);
+  font-size: 1.5rem;
+  /* The important ones */
+  background-clip: text;
+  -webkit-background-clip: text;
+
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+
+}
+.nav-menu{
+  color: #686767;
+}
+li:hover{
+  color: black;
+}
+.dynamic-nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(0px);
+  transition: background 0.35s ease, backdrop-filter 0.35s ease, box-shadow 0.35s ease;
+
+  /* dark initial shadow (very light) */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.dynamic-nav.scrolled {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(10px);
+
+  /* stronger dark shadow on scroll */
+  box-shadow: 0 4px 18px rgba(0,0,0,0.28);
+}
+/* =======================
+   DYNAMIC MODERN FOOTER
+   ======================= */
+
+.dynamic-footer {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 -6px 18px rgba(0,0,0,0.15);
+
+  /* smooth fade-in animation */
+  animation: footerFade 0.8s ease-out;
+}
+
+@keyframes footerFade {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* GRID */
+.footer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* TITLES */
+.footer-grid h3,
+.footer-grid h4 {
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+/* SOCIAL LINKS */
+.social {
+  list-style: none;
+  padding: 0;
+}
+
+.social li {
+  margin: 0.4rem 0;
+}
+
+.social a {
+  text-decoration: none;
+  color: #222;
+  font-weight: 500;
+
+  transition: color 0.25s ease, transform 0.25s ease;
+}
+
+.social a:hover {
+  color: #4f6cf6;
+  transform: translateX(5px);
+}
+
+/* FOOTER BOTTOM */
+.footer-bottom {
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  color: #444;
+}
+
+/* HOVER FLOAT EFFECT */
+.dynamic-footer:hover {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(15px);
+  box-shadow: 0 -10px 25px rgba(0,0,0,0.22);
+}
+
+/* MOBILE FRIENDLY */
+@media (max-width: 600px) {
+  .footer-grid {
+    text-align: center;
+  }
+}
+
+
+    </style>
+
+  <!-- Transparent + sticky + dynamic navbar -->
+  <header class="nav-wrap dynamic-nav">
+    <nav class="nav container" role="navigation" aria-label="Main navigation">
+      <a class="brand" href="{% url 'core:home' %}">
+        <img src="{% static 'img/logo.png' %}" alt="devetryx logo" class="logo"/>
+        <span class="brand-text">Devetryx</span>
+      </a>
+
+      <button id="nav-toggle" class="nav-toggle" aria-expanded="false" aria-controls="nav-menu">Menu</button>
+
+      <ul id="nav-menu" class="nav-menu">
+        <li><a href="{% url 'core:home' %}">Home</a></li>
+        <li><a href="{% url 'core:contact' %}">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer dynamic-footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <h3 class="brand">Devetryx</h3>
+      <p class="muted">Beginner-friendly coding & compilers with a modern touch.</p>
+    </div>
+
+    <div class="footer-links">
+      <h4 class="brand">Follow</h4>
+      <ul class="social">
+        <li><a href="#" aria-label="Twitter">Twitter</a></li>
+        <li><a href="#" aria-label="LinkedIn">LinkedIn</a></li>
+        <li><a href="#" aria-label="GitHub">GitHub</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-contact">
+      <h4 class="brand">Contact</h4>
+      <p class="muted">hello@devetryx.example</p>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <small>© {{ now|date:"Y" }} devetryx — All rights reserved</small>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+
+</body>
+</html>
