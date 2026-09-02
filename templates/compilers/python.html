@@ -1,459 +1,1149 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
-{% block title %}
-Devetryx | Python Compiler
+{% block title %}Devetryx — Intelligent Python Studio{% endblock %}
+
+{% block head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
-
 <style>
+  :root {
+    --bg-main: #090d16;
+    --bg-surface: #111726;
+    --bg-card: #182235;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --border-highlight: rgba(99, 102, 241, 0.35);
+    --accent-primary: #4f46e5;
+    --accent-hover: #4338ca;
+    --accent-cyan: #06b6d4;
+    --accent-emerald: #10b981;
+    --accent-amber: #f59e0b;
+    --accent-rose: #f43f5e;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+  }
 
-/* ================= GLOBAL ================= */
+  body {
+    background: var(--bg-main) !important;
+    color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    min-height: 100vh;
+  }
 
-html, body {
-    height: 100%;
-}
+  /* Command Deck Header */
+  .ide-header {
+    background: rgba(17, 23, 38, 0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border-color);
+    padding: 12px 24px;
+    margin-top: 56px;
+  }
 
-body {
-    background: #ffffff !important;
-    font-family: "Poppins", sans-serif;
-    margin: 0;
-    padding: 0;
-}
-
-/* ================= TITLE ================= */
-
-.compiler-title {
-    margin-top: 12vh;
-    text-align: center;
+  .ide-header-inner {
+    max-width: 1600px;
+    margin: 0 auto;
     display: flex;
-    justify-content: center;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .ide-badge-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .lang-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    padding: 6px 12px;
+    border-radius: 9999px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .telemetry-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    color: #34d399;
+    padding: 6px 12px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+  }
+
+  .pulse-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 10px #10b981;
+    animation: pulse 1.8s infinite;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(0.9); opacity: 0.7; }
+    50% { transform: scale(1.3); opacity: 1; }
+    100% { transform: scale(0.9); opacity: 0.7; }
+  }
+
+  .ide-actions {
+    display: flex;
     align-items: center;
     gap: 10px;
-}
+  }
 
-.compiler-title img {
-    height: 42px;
-}
-
-.compiler-title h2 {
+  .btn-run {
+    background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+    color: white;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 8px;
     font-weight: 600;
-    color: #222;
-    margin: 0;
-}
-
-/* ================= MAIN ================= */
-
-.compiler-container {
+    font-size: 13.5px;
     display: flex;
-    gap: 15px;
-    margin: 15px;
-    min-height: calc(100vh - 180px);
-}
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+    transition: all 0.2s ease;
+  }
 
-/* ================= PANELS ================= */
+  .btn-run:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.45);
+  }
 
-.editor-panel,
-.output-panel {
-    background: #ffffff;
-    border: 1px solid #dcdcdc;
-    border-radius: 6px;
-    padding: 10px;
+  .btn-run:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .btn-skill-graph {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-skill-graph:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--border-highlight);
+  }
+
+  /* Main Studio Layout */
+  .studio-container {
+    max-width: 1600px;
+    margin: 16px auto;
+    padding: 0 16px;
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 16px;
+    height: calc(100vh - 170px);
+    min-height: 600px;
+  }
+
+  @media (max-width: 1024px) {
+    .studio-container {
+      grid-template-columns: 1fr;
+      height: auto;
+    }
+  }
+
+  .panel-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
     display: flex;
     flex-direction: column;
-}
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  }
 
-.editor-panel { flex: 1 1 60%; }
-.output-panel { flex: 1 1 40%; }
-
-/* ================= FILE TABS ================= */
-
-.file-tabs {
+  /* Tab Bar */
+  .tab-bar {
+    background: rgba(0, 0, 0, 0.25);
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
-    background: #fafafa;
-    border-bottom: 1px solid #ddd;
-    height: 40px;
+    padding: 4px 8px 0;
     overflow-x: auto;
-}
+  }
 
-.file-tab {
+  .file-tab {
     padding: 8px 14px;
-    cursor: pointer;
-    border-right: 1px solid #eee;
-    background: #ffffff;
-    font-size: 14px;
-    white-space: nowrap;
-}
-
-.file-tab.active {
-    font-weight: 600;
-    border-bottom: 2px solid #4f6cf6;
-}
-
-/* ================= EDITOR ================= */
-
-#editor {
-    flex: 1;
-    min-height: 320px;
-}
-
-/* ================= OUTPUT ================= */
-
-.output-top-bar,
-.toggle-wrapper {
-    flex-shrink: 0;
-}
-
-.output-top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-}
-
-.run-btn {
-    padding: 8px 16px;
-    border: none;
-    color: #fff;
-    background: #4f6cf6;
-    border-radius: 4px;
-    font-size: 14px;
-    cursor: pointer;
-}
-
-.run-btn:hover {
-    background: #1e42fb;
-}
-
-.toggle-wrapper {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-}
-
-.toggle-label {
-    font-size: 14px;
-    font-weight: 500;
-}
-
-/* Toggle */
-
-.switch {
-    position: relative;
-    width: 52px;
-    height: 26px;
-}
-
-.switch input {
-    opacity: 0;
-}
-
-.slider {
-    position: absolute;
-    inset: 0;
-    background: #ccc;
-    border-radius: 34px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.slider:before {
-    content: "";
-    position: absolute;
-    height: 20px;
-    width: 20px;
-    left: 3px;
-    bottom: 3px;
-    background: #fff;
-    border-radius: 50%;
-    transition: 0.3s;
-}
-
-input:checked + .slider {
-    background: #5a74f7;
-}
-
-input:checked + .slider:before {
-    transform: translateX(24px);
-}
-
-/* ================= TERMINAL OUTPUT ================= */
-
-.intelligence-container {
-    flex: 1;
-    border: 1px solid #dcdcdc;
-    border-radius: 6px;
-    padding: 15px;
-    overflow-y: auto;
+    font-size: 13px;
+    color: var(--text-secondary);
     background: transparent;
-    color: #000000;
-    font-family: monospace;
-    font-size: 14px;
+    border: 1px solid transparent;
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.15s ease;
+  }
+
+  .file-tab:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .file-tab.active {
+    color: #fff;
+    background: var(--bg-surface);
+    border-color: var(--border-color);
+    border-bottom: 2px solid var(--accent-primary);
+    font-weight: 600;
+  }
+
+  .btn-new-tab {
+    padding: 6px 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  .btn-new-tab:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  #editor {
+    flex: 1;
+    min-height: 400px;
+  }
+
+  /* Right Panel Tabs & Control Deck */
+  .right-panel-header {
+    background: rgba(0, 0, 0, 0.25);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px;
+  }
+
+  .deck-tabs {
+    display: flex;
+    gap: 4px;
+  }
+
+  .deck-tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+  }
+
+  .deck-tab-btn.active {
+    background: rgba(99, 102, 241, 0.15);
+    color: #818cf8;
+  }
+
+  .deck-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 12px;
+  }
+
+  /* Assistance Levels Bar */
+  .assistance-level-bar {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 12px;
+  }
+
+  .assistance-title {
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .levels-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+  }
+
+  .level-btn {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    border-radius: 6px;
+    padding: 6px 4px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s ease;
+  }
+
+  .level-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+  }
+
+  .level-btn.active {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+    color: white;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+  }
+
+  .level-btn.warning-level.active {
+    background: var(--accent-amber);
+    border-color: var(--accent-amber);
+    color: #111;
+  }
+
+  /* Terminal Window */
+  .terminal-box {
+    flex: 1;
+    background: #06090e;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 14px;
+    font-family: 'Fira Code', monospace;
+    font-size: 13px;
+    overflow-y: auto;
     white-space: pre-wrap;
     word-break: break-word;
-}
+    color: #e2e8f0;
+    line-height: 1.5;
+  }
 
-/* ================= RESPONSIVE ================= */
+  .term-prompt { color: #60a5fa; }
+  .term-success { color: #34d399; }
+  .term-error { color: #f87171; }
+  .term-warning { color: #fbbf24; }
 
-@media (max-width: 992px) {
-    .compiler-container {
-        flex-direction: column;
-    }
-}
+  /* Input bar for stdin */
+  .stdin-bar {
+    display: none;
+    margin-top: 8px;
+    gap: 8px;
+  }
 
+  .stdin-input {
+    flex: 1;
+    background: #06090e;
+    border: 1px solid var(--border-highlight);
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: #fff;
+    font-family: 'Fira Code', monospace;
+    font-size: 13px;
+  }
+
+  .stdin-input:focus {
+    outline: none;
+    border-color: var(--accent-cyan);
+  }
+
+  /* Mentor Box Content */
+  .mentor-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 14px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .mentor-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .mentor-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 12px;
+    margin-bottom: 4px;
+  }
+
+  .mentor-text {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--text-primary);
+  }
+
+  .mentor-code-block {
+    background: #06090e;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 10px;
+    font-family: 'Fira Code', monospace;
+    font-size: 12.5px;
+    color: #38bdf8;
+    margin-top: 8px;
+    overflow-x: auto;
+  }
+
+  .tag-pill {
+    display: inline-block;
+    background: rgba(99, 102, 241, 0.15);
+    color: #a5b4fc;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    margin-right: 4px;
+    margin-top: 4px;
+  }
+
+  /* Skill Graph Drawer */
+  .drawer-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    justify-content: flex-end;
+  }
+
+  .drawer-panel {
+    background: var(--bg-surface);
+    border-left: 1px solid var(--border-color);
+    width: 480px;
+    max-width: 90vw;
+    height: 100%;
+    padding: 24px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
+    animation: slideInRight 0.3s ease;
+  }
+
+  @keyframes slideInRight {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+
+  .drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 16px;
+  }
+
+  .skill-metric-row {
+    margin-bottom: 12px;
+  }
+
+  .skill-metric-head {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12.5px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .skill-bar-bg {
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 9999px;
+    height: 7px;
+    overflow: hidden;
+  }
+
+  .skill-bar-fill {
+    height: 100%;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, #4f46e5, #06b6d4);
+    transition: width 0.4s ease;
+  }
+
+  .not-enough-badge {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  /* Modal Popup for New File */
+  .modal-popup {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    justify-content: center;
+    align-items: center;
+    z-index: 2500;
+  }
+
+  .modal-popup-content {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 24px;
+    width: 360px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  }
 </style>
 
-<!-- ================= TITLE ================= -->
-
-<div class="compiler-title">
-    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg">
-    <h2>Python Compiler</h2>
-</div>
-
-<!-- ================= MAIN ================= -->
-
-<div class="compiler-container container-fluid">
-
-    <!-- EDITOR -->
-    <div class="editor-panel">
-        <div class="file-tabs" id="fileTabs">
-            <div class="file-tab active" id="tab-main.py" onclick="switchTab('main.py')">main.py</div>
-            <div class="file-tab" onclick="openFilePopup()">+ New File</div>
-        </div>
-        <div id="editor"></div>
+<!-- COMMAND DECK HEADER -->
+<div class="ide-header">
+  <div class="ide-header-inner">
+    <div class="ide-badge-group">
+      <div class="lang-pill">
+        <i class="fa-brands fa-python" style="color: #38bdf8;"></i>
+        <span>Python 3.12 Engine</span>
+      </div>
+      <div class="telemetry-pill" id="telemetryIndicator">
+        <div class="pulse-dot"></div>
+        <span id="telemetryText">Telemetry Online</span>
+      </div>
     </div>
 
-    <!-- OUTPUT -->
-    <div class="output-panel">
+    <div class="ide-actions">
+      <button class="btn-skill-graph" onclick="openSkillDrawer()">
+        <i class="fa-solid fa-chart-pie" style="color: #818cf8;"></i>
+        <span>Skill Graph v1</span>
+      </button>
 
-        <div class="output-top-bar">
-            <strong>Output</strong>
-            <button class="run-btn" id="runBtn" onclick="runCode()">Run</button>
-        </div>
-
-        <div class="toggle-wrapper">
-            <span class="toggle-label" id="errorLabel">🖥 Compiler Mode</span>
-            <label class="switch">
-                <input type="checkbox" checked onchange="updateToggleText()" id="errorModeToggle">
-                <span class="slider"></span>
-            </label>
-        </div>
-
-        <div id="outputContainer" class="intelligence-container"></div>
-
-        <div id="terminalInputWrapper" style="display:none; margin-top:8px;">
-            <input 
-                id="terminalInput"
-                type="text"
-                placeholder="Type input and press Enter..."
-                style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; font-family:monospace;"
-            >
-        </div>
-
+      <button class="btn-run" id="runBtn" onclick="runCode()">
+        <i class="fa-solid fa-play"></i>
+        <span>Run (Ctrl+Enter)</span>
+      </button>
     </div>
+  </div>
 </div>
 
-<!-- ================= POPUP ================= -->
+<!-- MAIN STUDIO CONTAINER -->
+<div class="studio-container">
 
-<div id="popupBG" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); justify-content:center; align-items:center; z-index:1000;">
-    <div style="background:#fff; padding:20px; width:320px; border-radius:6px; border:1px solid #ccc;">
-        <strong>Create New File</strong>
-        <input id="newFileName" placeholder="example.py"
-               style="width:100%; padding:8px; margin-top:10px; border:1px solid #ccc; border-radius:4px;">
-        <div style="display:flex; justify-content:space-between; margin-top:15px;">
-            <button onclick="createFile()" style="background:#4f6cf6; color:#fff; border:none; padding:7px 14px; border-radius:4px;">
-                Create
-            </button>
-            <button onclick="closePopup()" style="background:#e0e0e0; border:none; padding:7px 14px; border-radius:4px;">
-                Cancel
-            </button>
-        </div>
+  <!-- LEFT PANEL: MONACO EDITOR -->
+  <div class="panel-card">
+    <div class="tab-bar" id="fileTabs">
+      <div class="file-tab active" id="tab-main.py" onclick="switchTab('main.py')">
+        <i class="fa-brands fa-python"></i>
+        <span>main.py</span>
+      </div>
+      <button class="btn-new-tab" onclick="openFileModal()">
+        <i class="fa-solid fa-plus"></i> New File
+      </button>
     </div>
+    <div id="editor"></div>
+  </div>
+
+  <!-- RIGHT PANEL: TERMINAL & AI MENTOR DECK -->
+  <div class="panel-card">
+    <div class="right-panel-header">
+      <div class="deck-tabs">
+        <button class="deck-tab-btn active" id="tabBtnTerminal" onclick="switchDeckView('terminal')">
+          <i class="fa-solid fa-terminal"></i> Terminal
+        </button>
+        <button class="deck-tab-btn" id="tabBtnMentor" onclick="switchDeckView('mentor')">
+          <i class="fa-solid fa-brain"></i> AI Mentor Studio
+        </button>
+      </div>
+      <div style="font-size: 11px; color: var(--text-muted);">
+        Isolated Subprocess Worker
+      </div>
+    </div>
+
+    <div class="deck-body">
+      
+      <!-- ASSISTANCE LEVEL SELECTOR -->
+      <div class="assistance-level-bar">
+        <div class="assistance-title">
+          <span>AI Assistance Level (Principle 2)</span>
+          <span id="activeLevelLabel" style="color: #818cf8;">L2: Explanation (Default)</span>
+        </div>
+        <div class="levels-grid">
+          <button class="level-btn" id="lvlBtn-1" onclick="selectAssistanceLevel(1)">1: Hint</button>
+          <button class="level-btn active" id="lvlBtn-2" onclick="selectAssistanceLevel(2)">2: Explain</button>
+          <button class="level-btn" id="lvlBtn-3" onclick="selectAssistanceLevel(3)">3: Guide</button>
+          <button class="level-btn warning-level" id="lvlBtn-4" onclick="selectAssistanceLevel(4)">4: Solution</button>
+          <button class="level-btn warning-level" id="lvlBtn-5" onclick="selectAssistanceLevel(5)">5: Auto</button>
+        </div>
+      </div>
+
+      <!-- VIEW A: TERMINAL -->
+      <div id="terminalView" style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
+        <div id="outputContainer" class="terminal-box">
+<span class="term-prompt">$ devetryx --status</span>
+<span class="term-success">✓ Isolated Subprocess Sandbox Ready</span>
+<span class="term-warning">⚡ AI explains before it replaces (Level 2 Active)</span>
+Press 'Run' or hit Ctrl+Enter to execute.
+        </div>
+
+        <div id="stdinWrapper" class="stdin-bar">
+          <input id="stdinInput" type="text" class="stdin-input" placeholder="Program requested standard input... press Enter to send">
+        </div>
+      </div>
+
+      <!-- VIEW B: AI MENTOR STUDIO -->
+      <div id="mentorView" style="flex: 1; display: none; flex-direction: column; overflow: hidden;">
+        <div class="mentor-card" id="mentorCard">
+          <span class="mentor-badge" style="background: rgba(99,102,241,0.2); color: #a5b4fc;">Devetryx Mentor Engine</span>
+          <h5 id="mentorHeadline" style="font-size: 16px; font-weight: 700; margin-top: 4px;">Ready for Intelligence Analysis</h5>
+          
+          <div class="mentor-section-title">🧠 Root Cause & Analysis</div>
+          <div class="mentor-text" id="mentorRootCause">Run your code or ask a question to receive level-guided mentorship.</div>
+
+          <div class="mentor-section-title">📚 Core Concept</div>
+          <div class="mentor-text" id="mentorConcept">Computer science fundamentals and algorithmic growth.</div>
+
+          <div class="mentor-section-title">🛠 Actionable Guidance</div>
+          <div class="mentor-text" id="mentorGuidance">Devetryx emphasizes active learning over passive copy-pasting.</div>
+
+          <div id="mentorCodeBlockWrapper" style="display: none;">
+            <div class="mentor-section-title">💻 Code Suggestion (Opt-In)</div>
+            <pre class="mentor-code-block" id="mentorCodeSnippet"></pre>
+          </div>
+
+          <div class="mentor-section-title">🏷 Concept Tags</div>
+          <div id="mentorTagsContainer">
+            <span class="tag-pill">python</span>
+            <span class="tag-pill">syntax</span>
+          </div>
+        </div>
+
+        <div style="margin-top: 10px; display: flex; gap: 8px;">
+          <input id="mentorUserQuery" type="text" class="stdin-input" placeholder="Ask AI Mentor a specific question about your code..." style="font-family: inherit;">
+          <button class="btn-run" onclick="askMentorDirectly()" style="padding: 6px 14px; font-size: 12px;">
+            <i class="fa-solid fa-paper-plane"></i> Ask
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
 </div>
 
+<!-- SKILL GRAPH DRAWER (PART 2.1) -->
+<div class="drawer-overlay" id="skillDrawer" onclick="closeSkillDrawer(event)">
+  <div class="drawer-panel" onclick="event.stopPropagation()">
+    <div class="drawer-header">
+      <div>
+        <h4 style="margin: 0; font-weight: 700;">Developer Skill Graph</h4>
+        <div style="font-size: 12px; color: var(--text-muted);">Real-Time Intelligence & Growth Telemetry</div>
+      </div>
+      <button onclick="closeSkillDrawer()" style="background: transparent; border: none; color: var(--text-secondary); font-size: 18px; cursor: pointer;">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Sample Size Banner -->
+    <div id="sampleSizeBanner" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 13px; font-weight: 600;">Sample Size</span>
+        <span id="sampleSizeCount" style="font-weight: 700; color: #38bdf8;">0 events</span>
+      </div>
+      <div id="sampleGatingMessage" style="font-size: 12px; color: #fbbf24; margin-top: 4px;">
+        ⚠️ Below 5 data points: scoring displays "not enough data yet" to avoid false confidence.
+      </div>
+    </div>
+
+    <!-- Language Competency: Python -->
+    <div>
+      <h6 style="font-size: 13px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 12px;">
+        🐍 Python Dimensions
+      </h6>
+
+      <div class="skill-metric-row">
+        <div class="skill-metric-head">
+          <span>Syntax & Mechanics</span>
+          <span id="skill-syntax-val" class="not-enough-badge">not enough data yet</span>
+        </div>
+        <div class="skill-bar-bg"><div class="skill-bar-fill" id="skill-syntax-bar" style="width: 0%;"></div></div>
+      </div>
+
+      <div class="skill-metric-row">
+        <div class="skill-metric-head">
+          <span>Functions & Modularity</span>
+          <span id="skill-functions-val" class="not-enough-badge">not enough data yet</span>
+        </div>
+        <div class="skill-bar-bg"><div class="skill-bar-fill" id="skill-functions-bar" style="width: 0%;"></div></div>
+      </div>
+
+      <div class="skill-metric-row">
+        <div class="skill-metric-head">
+          <span>Object-Oriented Programming (OOP)</span>
+          <span id="skill-oop-val" class="not-enough-badge">not enough data yet</span>
+        </div>
+        <div class="skill-bar-bg"><div class="skill-bar-fill" id="skill-oop-bar" style="width: 0%;"></div></div>
+      </div>
+
+      <div class="skill-metric-row">
+        <div class="skill-metric-head">
+          <span>Error Handling</span>
+          <span id="skill-error-val" class="not-enough-badge">not enough data yet</span>
+        </div>
+        <div class="skill-bar-bg"><div class="skill-bar-fill" id="skill-error-bar" style="width: 0%;"></div></div>
+      </div>
+
+      <div class="skill-metric-row">
+        <div class="skill-metric-head">
+          <span>Algorithms & Complexity</span>
+          <span id="skill-algo-val" class="not-enough-badge">not enough data yet</span>
+        </div>
+        <div class="skill-bar-bg"><div class="skill-bar-fill" id="skill-algo-bar" style="width: 0%;"></div></div>
+      </div>
+
+      <div class="skill-metric-row">
+        <div class="skill-metric-head">
+          <span>Optimization Awareness</span>
+          <span id="skill-opt-val" class="not-enough-badge">not enough data yet</span>
+        </div>
+        <div class="skill-bar-bg"><div class="skill-bar-fill" id="skill-opt-bar" style="width: 0%;"></div></div>
+      </div>
+    </div>
+
+    <!-- Weakest Areas -->
+    <div>
+      <h6 style="font-size: 13px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px;">
+        🎯 Focus Areas for Growth
+      </h6>
+      <div id="weakestAreasContainer">
+        <span style="font-size: 12.5px; color: var(--text-muted);">Execute more code to reveal targeted improvement areas.</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- POPUP MODAL: CREATE FILE -->
+<div id="fileModal" class="modal-popup">
+  <div class="modal-popup-content">
+    <h5 style="margin-top: 0; font-weight: 700;">Create File</h5>
+    <input id="newFileInput" type="text" class="stdin-input" placeholder="e.g. utils.py" style="width: 100%; margin-top: 10px;">
+    <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px;">
+      <button onclick="closeFileModal()" style="background: rgba(255,255,255,0.08); border: none; color: #fff; padding: 6px 12px; border-radius: 6px; cursor: pointer;">Cancel</button>
+      <button onclick="confirmCreateFile()" class="btn-run" style="padding: 6px 14px;">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCRIPTS: MONACO & IDE LOGIC -->
 <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.js"></script>
 
 <script>
+  let editor;
+  let currentFile = "main.py";
+  let activeAssistanceLevel = 2; // Level 2: Explanation (Default per Principle 2)
+  let collectedInputs = [];
+  let eventCounter = 0;
 
-let editor;
-let currentFileName = "main.py";
-const fileContents = { "main.py": 'print("Welcome to Devetryx!")' };
+  const fileContents = {
+    "main.py": `# Welcome to Devetryx Intelligent Studio
+# Devetryx measures developer growth — not just writes or fixes code.
 
-/* ================= MONACO ================= */
+def calculate_fibonacci(n):
+    if n <= 1:
+        return n
+    return calculate_fibonacci(n - 1) + calculate_fibonacci(n - 2)
 
-require.config({ paths: { vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs" } });
+for i in range(7):
+    print(f"Fib({i}) = {calculate_fibonacci(i)}")
+`
+  };
 
-require(["vs/editor/editor.main"], function () {
+  /* ---------------- MONACO INITIALIZATION ---------------- */
+  require.config({ paths: { vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs" } });
+
+  require(["vs/editor/editor.main"], function () {
     editor = monaco.editor.create(document.getElementById("editor"), {
-        value: fileContents[currentFileName],
-        language: "python",
-        theme: "vs",
-        fontSize: 14,
-        minimap: { enabled: false },
-        automaticLayout: true
+      value: fileContents[currentFile],
+      language: "python",
+      theme: "vs-dark",
+      fontSize: 14,
+      fontFamily: "'Fira Code', Consolas, monospace",
+      minimap: { enabled: false },
+      automaticLayout: true,
+      lineNumbers: "on",
+      scrollBeyondLastLine: false,
+      padding: { top: 12 }
     });
 
     editor.onDidChangeModelContent(() => {
-        fileContents[currentFileName] = editor.getValue();
+      fileContents[currentFile] = editor.getValue();
     });
-});
 
-/* ================= FILE MANAGEMENT ================= */
+    // Ctrl+Enter keyboard shortcut to execute
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, function () {
+      runCode();
+    });
+  });
 
-function switchTab(name) {
-    if (currentFileName === name) return;
+  /* ---------------- TAB MANAGEMENT ---------------- */
+  function switchTab(name) {
+    if (currentFile === name) return;
+    fileContents[currentFile] = editor.getValue();
 
-    fileContents[currentFileName] = editor.getValue();
-    document.getElementById(`tab-${currentFileName}`).classList.remove("active");
-    document.getElementById(`tab-${name}`).classList.add("active");
+    const oldTab = document.getElementById(`tab-${currentFile}`);
+    if (oldTab) oldTab.classList.remove("active");
 
-    currentFileName = name;
-    editor.setValue(fileContents[name]);
-}
+    const newTab = document.getElementById(`tab-${name}`);
+    if (newTab) newTab.classList.add("active");
 
-function openFilePopup() {
-    document.getElementById("popupBG").style.display = "flex";
-}
+    currentFile = name;
+    editor.setValue(fileContents[name] || "");
+  }
 
-function closePopup() {
-    document.getElementById("popupBG").style.display = "none";
-}
+  function openFileModal() {
+    document.getElementById("fileModal").style.display = "flex";
+    document.getElementById("newFileInput").focus();
+  }
 
-function createFile() {
-    let name = document.getElementById("newFileName").value.trim();
-    if (!name) return alert("File name required");
+  function closeFileModal() {
+    document.getElementById("fileModal").style.display = "none";
+    document.getElementById("newFileInput").value = "";
+  }
 
+  function confirmCreateFile() {
+    let name = document.getElementById("newFileInput").value.trim();
+    if (!name) return alert("File name is required.");
     if (!name.endsWith(".py")) name += ".py";
-    if (fileContents[name]) return alert("File already exists");
+    if (fileContents[name]) return alert("File already exists.");
 
-    fileContents[name] = "";
+    fileContents[name] = "# Module: " + name + "\n\n";
 
     const tab = document.createElement("div");
     tab.className = "file-tab";
     tab.id = `tab-${name}`;
-    tab.innerText = name;
+    tab.innerHTML = `<i class="fa-brands fa-python"></i> <span>${name}</span>`;
     tab.onclick = () => switchTab(name);
 
-    document.getElementById("fileTabs")
-        .insertBefore(tab, document.getElementById("fileTabs").lastElementChild);
+    const tabsContainer = document.getElementById("fileTabs");
+    tabsContainer.insertBefore(tab, tabsContainer.lastElementChild);
 
-    closePopup();
+    closeFileModal();
     switchTab(name);
-}
+  }
 
-/* ================= RUN CODE ================= */
-let pendingInputResolve = null;
-let collectedInputs = [];
+  /* ---------------- DECK VIEW TOGGLES ---------------- */
+  function switchDeckView(view) {
+    const termBtn = document.getElementById("tabBtnTerminal");
+    const mentorBtn = document.getElementById("tabBtnMentor");
+    const termView = document.getElementById("terminalView");
+    const mentorView = document.getElementById("mentorView");
 
-function runCode() {
+    if (view === "terminal") {
+      termBtn.classList.add("active");
+      mentorBtn.classList.remove("active");
+      termView.style.display = "flex";
+      mentorView.style.display = "none";
+    } else {
+      termBtn.classList.remove("active");
+      mentorBtn.classList.add("active");
+      termView.style.display = "none";
+      mentorView.style.display = "flex";
+    }
+  }
 
-    const body = document.getElementById("outputContainer");
+  /* ---------------- ASSISTANCE LEVEL SELECTOR ---------------- */
+  function selectAssistanceLevel(lvl) {
+    activeAssistanceLevel = lvl;
+    for (let i = 1; i <= 5; i++) {
+      const btn = document.getElementById(`lvlBtn-${i}`);
+      if (btn) btn.classList.toggle("active", i === lvl);
+    }
+
+    const labels = {
+      1: "L1: Hint Only (Nudge)",
+      2: "L2: Explanation (Default ⭐)",
+      3: "L3: Guided Fix",
+      4: "L4: Suggested Solution (⚠️ Opt-in)",
+      5: "L5: Autonomous Analysis"
+    };
+    document.getElementById("activeLevelLabel").innerText = labels[lvl] || "Level " + lvl;
+  }
+
+  /* ---------------- CODE EXECUTION PIPELINE ---------------- */
+  function runCode() {
     const runBtn = document.getElementById("runBtn");
-    const toggle = document.getElementById("errorModeToggle");
+    const outputContainer = document.getElementById("outputContainer");
+
+    if (editor) {
+      fileContents[currentFile] = editor.getValue();
+    }
 
     runBtn.disabled = true;
-    runBtn.innerText = "Running...";
+    runBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Executing...</span>';
 
-    body.innerHTML = "$ python " + currentFileName + "\n\n";
+    outputContainer.innerHTML = `<span class="term-prompt">$ python ${currentFile}</span>\n\n`;
     collectedInputs = [];
 
-    executeWithInput();
-}
+    executeSandboxedRequest();
+  }
 
-function executeWithInput() {
-
-    const body = document.getElementById("outputContainer");
-    const toggle = document.getElementById("errorModeToggle");
+  function executeSandboxedRequest() {
+    const outputContainer = document.getElementById("outputContainer");
 
     fetch("/run/python/", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": getCookie("csrftoken")
-        },
-        body: JSON.stringify({
-            files: fileContents,
-            main_file: currentFileName,
-            mode: toggle.checked ? "compiler" : "mentor",
-            user_input: collectedInputs.join("\n")
-        })
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCsrfToken()
+      },
+      body: JSON.stringify({
+        files: fileContents,
+        main_file: currentFile,
+        mode: "mentor",
+        assistance_level: activeAssistanceLevel,
+        user_input: collectedInputs.join("\n")
+      })
     })
     .then(res => res.json())
     .then(data => {
+      eventCounter++;
+      document.getElementById("telemetryText").innerText = `Telemetry Online (${eventCounter} events)`;
 
-        if (data.waiting_for_input) {
-            // During input stage → append
-            body.innerHTML += data.output;
-            showInputBox();
+      if (data.waiting_for_input) {
+        outputContainer.innerHTML += data.output;
+        showStdinPrompt();
+      } else {
+        if (data.stderr) {
+          outputContainer.innerHTML = `<span class="term-prompt">$ python ${currentFile}</span>\n<span class="term-error">${escapeHtml(data.stderr)}</span>`;
         } else {
-            // Final execution → REPLACE entire terminal
-            body.innerHTML = "$ python " + currentFileName + "\n\n" + data.output;
-            finishRun();
+          outputContainer.innerHTML = `<span class="term-prompt">$ python ${currentFile}</span>\n<span class="term-success">${escapeHtml(data.stdout || '(Program completed with no output)')}</span>`;
         }
 
-        body.scrollTop = body.scrollHeight;
+        if (data.mentor_feedback) {
+          renderMentorFeedback(data.mentor_feedback);
+        }
+
+        finishExecution();
+      }
+      outputContainer.scrollTop = outputContainer.scrollHeight;
     })
-
     .catch(err => {
-        body.innerHTML += "Error: " + err;
-        finishRun();
+      outputContainer.innerHTML += `\n<span class="term-error">Worker Error: ${escapeHtml(err.message || err)}</span>`;
+      finishExecution();
     });
-}
+  }
 
-function showInputBox() {
-    const inputBox = document.getElementById("terminalInputWrapper");
-    const inputField = document.getElementById("terminalInput");
+  function showStdinPrompt() {
+    const wrapper = document.getElementById("stdinWrapper");
+    const input = document.getElementById("stdinInput");
+    wrapper.style.display = "flex";
+    input.focus();
 
-    inputBox.style.display = "block";
-    inputField.focus();
-
-    inputField.onkeydown = function(e) {
-        if (e.key === "Enter") {
-            const value = inputField.value;
-            collectedInputs.push(value);
-
-            const body = document.getElementById("outputContainer");
-            body.innerHTML += value + "\n";
-
-            inputField.value = "";
-            inputBox.style.display = "none";
-
-            executeWithInput();
-        }
+    input.onkeydown = function (e) {
+      if (e.key === "Enter") {
+        const val = input.value;
+        collectedInputs.push(val);
+        document.getElementById("outputContainer").innerHTML += val + "\n";
+        input.value = "";
+        wrapper.style.display = "none";
+        executeSandboxedRequest();
+      }
     };
-}
+  }
 
-function finishRun() {
+  function finishExecution() {
     const runBtn = document.getElementById("runBtn");
     runBtn.disabled = false;
-    runBtn.innerText = "Run";
-}
+    runBtn.innerHTML = '<i class="fa-solid fa-play"></i> <span>Run (Ctrl+Enter)</span>';
+  }
 
+  /* ---------------- MENTOR RENDERING ---------------- */
+  function renderMentorFeedback(feedback) {
+    document.getElementById("mentorHeadline").innerText = feedback.headline || "Devetryx Intelligence";
+    document.getElementById("mentorRootCause").innerText = feedback.root_cause || "None";
+    document.getElementById("mentorConcept").innerText = feedback.concept_explanation || "General Python structure";
+    document.getElementById("mentorGuidance").innerText = feedback.actionable_guidance || "Keep practicing!";
 
-/* ================= TOGGLE ================= */
+    const snippetWrapper = document.getElementById("mentorCodeBlockWrapper");
+    const snippetEl = document.getElementById("mentorCodeSnippet");
+    if (feedback.code_suggestion) {
+      snippetWrapper.style.display = "block";
+      snippetEl.innerText = feedback.code_suggestion;
+    } else {
+      snippetWrapper.style.display = "none";
+    }
 
-function updateToggleText() {
-    const toggle = document.getElementById("errorModeToggle");
-    document.getElementById("errorLabel").innerText =
-        toggle.checked ? "🖥 Compiler Mode" : "🧠 Learning Mode";
-}
+    const tagsContainer = document.getElementById("mentorTagsContainer");
+    tagsContainer.innerHTML = "";
+    (feedback.concept_tags || ["python"]).forEach(t => {
+      const sp = document.createElement("span");
+      sp.className = "tag-pill";
+      sp.innerText = t;
+      tagsContainer.appendChild(sp);
+    });
+  }
 
-/* ================= CSRF ================= */
+  function askMentorDirectly() {
+    const query = document.getElementById("mentorUserQuery").value.trim();
+    if (!query) return;
 
-function getCookie(name) {
+    if (editor) fileContents[currentFile] = editor.getValue();
+
+    fetch("/api/ai/mentor/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCsrfToken()
+      },
+      body: JSON.stringify({
+        user_question: query,
+        current_file: currentFile,
+        code: fileContents[currentFile],
+        files: fileContents,
+        assistance_level: activeAssistanceLevel
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.feedback) {
+        renderMentorFeedback(data.feedback);
+        switchDeckView("mentor");
+        document.getElementById("mentorUserQuery").value = "";
+      }
+    });
+  }
+
+  /* ---------------- SKILL DRAWER & TELEMETRY ---------------- */
+  function openSkillDrawer() {
+    document.getElementById("skillDrawer").style.display = "flex";
+    fetchSkillGraph();
+  }
+
+  function closeSkillDrawer(e) {
+    document.getElementById("skillDrawer").style.display = "none";
+  }
+
+  function fetchSkillGraph() {
+    fetch("/api/skills/")
+      .then(res => res.json())
+      .then(data => {
+        const sampleSize = data.sample_size || 0;
+        document.getElementById("sampleSizeCount").innerText = `${sampleSize} events`;
+
+        const gatingMsg = document.getElementById("sampleGatingMessage");
+        if (data.has_sufficient_data) {
+          gatingMsg.innerHTML = "✓ Confident Skill Scoring Active (5+ events logged).";
+          gatingMsg.style.color = "#34d399";
+        } else {
+          gatingMsg.innerHTML = "⚠️ Below 5 data points: scoring displays 'not enough data yet' to avoid false confidence.";
+          gatingMsg.style.color = "#fbbf24";
+        }
+
+        const dims = ["syntax", "functions", "oop", "error_handling", "algorithms", "optimization"];
+        const idMap = {
+          "syntax": "skill-syntax",
+          "functions": "skill-functions",
+          "oop": "skill-oop",
+          "error_handling": "skill-error",
+          "algorithms": "skill-algo",
+          "optimization": "skill-opt"
+        };
+
+        dims.forEach(d => {
+          const val = data.languages?.python?.[d];
+          const valEl = document.getElementById(`${idMap[d]}-val`);
+          const barEl = document.getElementById(`${idMap[d]}-bar`);
+
+          if (typeof val === "number") {
+            const pct = Math.round(val * 100);
+            valEl.className = "";
+            valEl.innerText = `${pct}%`;
+            valEl.style.color = "#38bdf8";
+            barEl.style.width = `${pct}%`;
+          } else {
+            valEl.className = "not-enough-badge";
+            valEl.innerText = "not enough data yet";
+            barEl.style.width = "0%";
+          }
+        });
+
+        // Render weakest areas
+        const weakContainer = document.getElementById("weakestAreasContainer");
+        weakContainer.innerHTML = "";
+        if (data.weakest_areas && data.weakest_areas.length > 0) {
+          data.weakest_areas.forEach(area => {
+            const pill = document.createElement("span");
+            pill.className = "tag-pill";
+            pill.style.borderColor = "rgba(244, 63, 94, 0.4)";
+            pill.style.color = "#fb7185";
+            pill.innerText = `Focus: ${area}`;
+            weakContainer.appendChild(pill);
+          });
+        } else {
+          weakContainer.innerHTML = `<span style="font-size: 12.5px; color: var(--text-muted);">${data.has_sufficient_data ? 'No critical weaknesses detected.' : 'Need 5+ events to isolate weak areas.'}</span>`;
+        }
+      });
+  }
+
+  /* ---------------- HELPERS ---------------- */
+  function getCsrfToken() {
     let value = null;
     document.cookie.split(";").forEach(c => {
-        c = c.trim();
-        if (c.startsWith(name + "=")) {
-            value = c.substring(name.length + 1);
-        }
+      c = c.trim();
+      if (c.startsWith("csrftoken=")) {
+        value = c.substring("csrftoken=".length);
+      }
     });
-    return value;
-}
+    return value || "";
+  }
 
+  function escapeHtml(str) {
+    if (!str) return "";
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
 </script>
-
 {% endblock %}

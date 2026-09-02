@@ -56,9 +56,8 @@ Analyzes your code and provides:
 ---
 
 ## 📦 Installation
-
-### 1️⃣ Clone Repository
 ```bash
+1️⃣ Clone Repository
 git clone https://github.com/your-username/devetryx.git
 cd devetryx
 
